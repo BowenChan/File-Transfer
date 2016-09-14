@@ -10,13 +10,25 @@ import re
 
 
 def set_home_directory():
+	"""
+		Sets the working directory to /Users/{Current User}
+	"""
 	home = os.path.expanduser("~")
 	os.chdir(home)
+
 def script_path():
+	"""
+		Returns the path of the script
+	"""
 	pathname = os.path.dirname(sys.argv[0])	
 	return os.path.abspath(pathname)
 
 def set_completer():
+	"""
+		Sets up the folders autocompletion
+
+		Code taken from http://stackoverflow.com/questions/6656819/filepath-autocompletion-using-users-input
+	"""
 	set_home_directory()
 	readline.set_completer_delims(' \t\n;')
 	readline.parse_and_bind("tab: complete")
@@ -28,6 +40,9 @@ def modify_path(option):
 	"""
 
 	def debug_path():
+		"""
+			DEBUGGING PURPOSES: Determines the paths of the program currently
+		"""
 		print
 		print "Script path is "
 		print script_path()
@@ -118,6 +133,9 @@ def compare_files(dcmp):
 		#	print_diff_files(sub_dcmp)
 
 	def determines_missing_files(dcmp):
+		"""
+			Checks and prints out any missing files from the test folder(Right)
+		"""
 		flag = True
 		for names in dcmp.left_list:
 			if names not in dcmp.right_list:
@@ -127,14 +145,19 @@ def compare_files(dcmp):
 		return flag
 
 	def check_list(dcmp):
+		"""
+			DEBUGGING PURPOSE: Determine the files in both directory
+		"""
 		print dcmp.left_list
 		print
 		print dcmp.right_list
 
 
-	print check_list(dcmp)
+	#print check_list(dcmp)
+	#print
+	#print dcmp.same_files
 	print
-	print dcmp.same_files
+	print "------------------- Determining out-of-date files -------------------"
 	print
 	print_diff_files(dcmp)
 	
@@ -143,20 +166,55 @@ def compare_files(dcmp):
 	if determines_missing_files(dcmp):
 		print "There are no missing files"
 
-def replace_files(dcmp):
+def replace_or_add_files(dcmp):
+	"""
+		Checks and modifies the directory on the right wi thte directory on the right
+	"""
+	def path_exist(path):
+		"""
+			Method path_exist
 
-	def replace(name):
-		print "File has been replaced"
+			returns whether the path exist in your folder structure
+
+		"""
+		set_home_directory()
+		return os.path.lexists(path)
+
+	
+	def add(name, flag):
+		"""
+			Replaces the files from LEft to right
+		"""
+		os.system("cp %s/%s %s/%s"  % (paths_configs['start_path'], name, paths_configs['end_path'], name))
+		if flag == False:
+			print "File has been added"
+		elif flag == True:
+			print "File has been replaced"
 		print
 
-	def permission_to_replace(dcmp):
+
+	def permission_to_add(dcmp):
+		"""
+			Interate through each file to ensure that the user would like to add the files
+		"""
 		for names in dcmp.left_list:
 			if names not in dcmp.right_list:
-				print "Would you like to replace %s" % names
+				print "Would you like to add %s" % names
 				answer = raw_input()
 				if answer == "y":
-					replace(answer)
+					add(names, False)
 
+	def permission_to_replace(dcmp):
+		"""
+			Iterate through the folder to see which ones have been modified and if you would like to replace
+		"""
+		for name in dcmp.diff_files:
+			print "Would you like to replace %s" % name
+			answer = raw_input()
+			if answer == "y":
+				add(name, True)
+
+	permission_to_add(dcmp)
 	permission_to_replace(dcmp)
 
 def complete(text, state):
@@ -186,7 +244,10 @@ if __name__ == "__main__":
 			print
 			dcmp = dircmp(paths_configs['start_path'], paths_configs['end_path'], ignore = list_of_ignore)
 			compare_files(dcmp)
-			replace_files(dcmp)
+			replace_or_add_files(dcmp)
+
 		print
 		print "What would you like to do"
 		input_response = raw_input()
+
+
