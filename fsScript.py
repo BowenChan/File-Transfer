@@ -220,7 +220,26 @@ def replace_or_add_files(dcmp):
 def complete(text, state):
     return (glob.glob(text+'*')+[None])[state]
 
+def archive_destination_folder():
+	"""
+		Create an archive folder, if the folder does not exist, and place all old files with a suffix of v# and prefix of DATE
+	"""
+	"""
+		Concept: Create Archive Folder if not found
+		Check for all the modified files.
+		Enter a permission check. If user provides permission to move then go further, if add then do not proceed with this function
 
+		When given permission, look for the file in the destination and check the archive folder if any file containing this name exist
+			if so, Place the file with a date and time stamp as the prefix and affix the suffice v#
+			Check for the lastest version and increment that number by 1
+
+			Deliminate the file by _ check the second half for nmae and last half for versionss
+	"""
+	return "Hello"
+
+def print_all_modifications():
+	return "hello"
+	
 if __name__ == "__main__":
 
 	list_of_ignore = ['.DS_Store', '.git', 'README.md']
