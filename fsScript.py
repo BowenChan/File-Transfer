@@ -34,10 +34,31 @@ def set_completer():
 	readline.parse_and_bind("tab: complete")
 	readline.set_completer(complete)
 
-def create_path(option):
+def create_path():
 	"""
 		Create a new object within the json config
 	"""
+	set_completer()
+
+	print "New File Created"
+	configJSON = {}
+	configJSON["Configs"] = {}
+	# Need to modify the modify path for reusability
+	print "What would you like to name the first Config: ",
+	config_name = raw_input()
+	print "What would you like the initial start path: ",
+	start_path = raw_input()
+	print "What would you like the initial end path: ",
+	end_path = raw_input()
+	config_tree = {}
+	config_tree["%s"  % config_name] = {}
+	data = {"start_path" : "%s" % start_path, "end_path" :"%s" %end_path }
+	config_tree["%s" % config_name] = data
+	configJSON["Configs"] = config_tree
+
+	jsonFile = codecs.open('%s/config.json' % file_path, 'w+', 'utf-8')
+	jsonFile.write(json.dumps(configJSON, indent = 4))
+	jsonFile.close()
 
 def modify_path(option):
 	"""
@@ -252,10 +273,13 @@ if __name__ == "__main__":
 
 	file_path = script_path()
 
-	with codecs.open('%s/config.json' % file_path, 'r', 'utf-8') as config_file:
-		paths_configs = json.loads(config_file.read())
-		# Need to create a failsafe incase there is no configs. This will be required to create one in the emergency
-		
+	try:
+		with codecs.open('%s/config.json' % file_path, 'r', 'utf-8') as config_file:
+			paths_configs = json.loads(config_file.read())
+			# Need to create a failsafe incase there is no configs. This will be required to create one in the emergency
+	except IOError:
+		create_path()
+
 	print paths_configs
 	print "What would you like to do"
 	
