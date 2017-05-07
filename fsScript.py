@@ -252,7 +252,13 @@ if __name__ == "__main__":
 
 	print paths_configs
 	print "What would you like to do"
+	
+	print "\tstart (Modify the source folder)"
+	print "\tend (Modify the end folder)"
+	print "\tq (Quit the program)"
+	print "What would you like to do: ",
 	input_response = raw_input()
+	
 	while True:
 		if input_response == "start" or input_response == "end":
 			modify_path(input_response)
@@ -267,6 +273,10 @@ if __name__ == "__main__":
 
 		print
 		print "What would you like to do"
+		print "\tstart (Modify the source folder)"
+		print "\tend (Modify the end folder)"
+		print "\tq (Quit the program)"
+		print "What would you like to do: ",
 		input_response = raw_input()
 
 
