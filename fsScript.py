@@ -242,7 +242,7 @@ def print_all_modifications():
 	
 if __name__ == "__main__":
 
-	list_of_ignore = ['.DS_Store', '.git', 'README.md']
+	list_of_ignore = ['.DS_Store', '.git']
 
 
 	file_path = script_path()
