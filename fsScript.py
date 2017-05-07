@@ -38,7 +38,7 @@ def create_path(option):
 	"""
 		Create a new object within the json config
 	"""
-	
+
 def modify_path(option):
 	"""
 		Changes either the end or start path of the file
@@ -254,7 +254,8 @@ if __name__ == "__main__":
 
 	with codecs.open('%s/config.json' % file_path, 'r', 'utf-8') as config_file:
 		paths_configs = json.loads(config_file.read())
-
+		# Need to create a failsafe incase there is no configs. This will be required to create one in the emergency
+		
 	print paths_configs
 	print "What would you like to do"
 	
