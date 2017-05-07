@@ -34,6 +34,11 @@ def set_completer():
 	readline.parse_and_bind("tab: complete")
 	readline.set_completer(complete)
 
+def create_path(option):
+	"""
+		Create a new object within the json config
+	"""
+	
 def modify_path(option):
 	"""
 		Changes either the end or start path of the file
@@ -253,9 +258,11 @@ if __name__ == "__main__":
 	print paths_configs
 	print "What would you like to do"
 	
-	print "\tstart (Modify the source folder)"
-	print "\tend (Modify the end folder)"
-	print "\tq (Quit the program)"
+	print "\tc 		(Create a new path)"
+	print "\tstart 	\t(Modify the source folder)"
+	print "\tend 	\t(Modify the end folder)"
+	print "\tq 		(Quit the program)"
+	print "\tAny key to continue"
 	print "What would you like to do: ",
 	input_response = raw_input()
 	
@@ -276,6 +283,7 @@ if __name__ == "__main__":
 		print "\tstart (Modify the source folder)"
 		print "\tend (Modify the end folder)"
 		print "\tq (Quit the program)"
+		print "\tAny Key to continue"
 		print "What would you like to do: ",
 		input_response = raw_input()
 
