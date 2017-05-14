@@ -28,15 +28,24 @@ def set_completer():
 		Sets up the folders autocompletion
 
 		Code taken from http://stackoverflow.com/questions/6656819/filepath-autocompletion-using-users-input
-	"""
+	"""  
+
 	set_home_directory()
 	readline.set_completer_delims(' \t\n;')
 	readline.parse_and_bind("tab: complete")
 	readline.set_completer(complete)
 
-def load_configs():
-	print "Loaded configs"
-
+def load_configs(configs_key):
+	print "%s" % configs_key
+	print "Which configs would you like to load: ",
+	user_config_resp = raw_input()
+	if user_config_resp in configs_key:
+		global configs_loaded 
+		configs_loaded = user_config_resp
+		print configs[configs_loaded]
+		print "Loaded"
+	else:
+		print "Please load a valid config"
 def create_path():
 	"""
 		Create a new object within the json config
@@ -289,42 +298,56 @@ if __name__ == "__main__":
 	#print paths_configs["Configs"]["New"].keys()
 	
 	#Rename the variable later
-	configs_set = paths_configs["Configs"]
-	print configs_set.keys()
-	print configs_set
-	"""
+	configs = paths_configs["Configs"]
+	configs_key = configs.keys()
+	print configs
+	print configs_key
+	
 
-	print "What would you like to do"
+	print "----------------------------------Menu----------------------------------"
 	
 	print "\tc 		(Create a new path)"
 	print "\tload	\t(Load a config)"
 	print "\tstart 	\t(Modify the source folder)"
 	print "\tend 	\t(Modify the end folder)"
 	print "\tq 		(Quit the program)"
-	print "\tAny key to continue"
-	print "What would you like to do: ",
-	input_response = raw_input()
+	print "\tAny key to continue\n"
 	
-	while True:
-		if input_response == "start" or input_response == "end":
-			modify_path(input_response)
-		elif input_response == "q":
-			break
-		else:
-			print "----------------Comparing The Directories %s and %s ---------------------------" % (paths_configs['start_path'], paths_configs['end_path'])
-			print
-			dcmp = dircmp(paths_configs['start_path'], paths_configs['end_path'], ignore = list_of_ignore)
-			compare_files(dcmp)
-			replace_or_add_files(dcmp)
+	input_response = raw_input( "What would you like to do: ")
+		
 
+	while True:
+
+		if input_response == "q":
+			break
+		elif input_response == "load":
+			load_configs(configs_key)
+		elif input_response == "start" or input_response == "end":
+			try:
+				if not configs_loaded is None:
+					if input_response == "start" or input_response == "end":
+						modify_path(input_response)
+					else:
+						print "----------------Comparing The Directories %s and %s ---------------------------" % (paths_configs['start_path'], paths_configs['end_path'])
+						print
+						dcmp = dircmp(paths_configs['start_path'], paths_configs['end_path'], ignore = list_of_ignore)
+						compare_files(dcmp)
+						replace_or_add_files(dcmp)
+			except NameError:
+				print "Please load a config before starting"
+		else:
+			print "Please enter a valid value"
 		print
-		print "What would you like to do"
-		print "\tstart (Modify the source folder)"
-		print "\tend (Modify the end folder)"
-		print "\tq (Quit the program)"
-		print "\tAny Key to continue"
-		print "What would you like to do: ",
-		input_response = raw_input()
+		print "----------------------------------Menu----------------------------------"
+
+		print "\tc 		(Create a new path)"
+		print "\tload	\t(Load a config)"
+		print "\tstart 	\t(Modify the source folder)"
+		print "\tend 	\t(Modify the end folder)"
+		print "\tq 		(Quit the program)"
+		print "\tAny key to continue\n"
+
+		input_response = raw_input("What would you like to do: ")
 	
-	"""
+	
 	
