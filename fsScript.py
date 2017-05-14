@@ -36,6 +36,9 @@ def set_completer():
 	readline.set_completer(complete)
 
 def load_configs(configs_key):
+	"""
+		this function allows the user to switch beteween different configs path in the json
+	"""
 	print "%s" % configs_key
 	print "Which configs would you like to load: ",
 	user_config_resp = raw_input()
@@ -46,32 +49,44 @@ def load_configs(configs_key):
 		print "Loaded"
 	else:
 		print "Please load a valid config"
-def create_path():
+
+def create_path(initial, config_file):
 	"""
 		Create a new object within the json config
 	"""
 	set_completer()
 
-	print "New File Created"
-	configJSON = {}
-	configJSON["Configs"] = {}
-	# Need to modify the modify path for reusability
-	print "What would you like to name the first Config: ",
-	config_name = raw_input()
-	print "What would you like the initial start path: ",
-	start_path = raw_input()
-	print "What would you like the initial end path: ",
-	end_path = raw_input()
-	config_tree = {}
-	config_tree["%s"  % config_name] = {}
-	data = {"start_path" : "%s" % os.path.abspath(start_path), "end_path" :"%s" % os.path.abspath(end_path) }
-	config_tree["%s" % config_name] = data
-	configJSON["Configs"] = config_tree
+	def config_response():
+		config_info = {}
+		config_info["config_name"] = raw_input("What would you like to name the Config: ")
+		config_info["start_path"] = raw_input("What would you like the initial start path: ")
+		config_info["end_path"] = raw_input("What would you like the initial end path: ")
+		return config_info
 
-	jsonFile = codecs.open('%s/config.json' % file_path, 'w+', 'utf-8')
-	jsonFile.write(json.dumps(configJSON, indent = 4))
-	jsonFile.close()
+	def create_data_config():
+		config_tree = {}
+		config_tree["%s"  % config_info["config_name"]] = {}
+		data = {"start_path" : "%s" % os.path.abspath(config_info["start_path"]), "end_path" :"%s" % os.path.abspath(config_info["end_path"]) }
+		config_tree["%s" % config_info["config_name"]] = data
+		return config_tree
 
+	print "=============================Creating new Config File============================="
+	if initial is True:
+		configJSON = {}
+		configJSON["Configs"] = {}
+		
+		config_info = config_response()
+		config_tree = create_data_config()
+
+		configJSON["Configs"] = config_tree
+
+		jsonFile = codecs.open('%s/config.json' % file_path, 'w+', 'utf-8')
+		jsonFile.write(json.dumps(configJSON, indent = 4))
+		jsonFile.close()
+
+		print "===============================New File Created==============================="
+	else:
+		print "Loading file"
 def modify_path(option):
 	"""
 		Changes either the end or start path of the file
@@ -290,7 +305,7 @@ if __name__ == "__main__":
 			paths_configs = json.loads(config_file.read())
 			# Need to create a failsafe incase there is no configs. This will be required to create one in the emergency
 	except IOError:
-		create_path()
+		create_path(True, None)
 		with codecs.open('%s/config.json' % file_path, 'r', 'utf-8') as config_file:
 			paths_configs = json.loads(config_file.read())			
 
@@ -322,11 +337,13 @@ if __name__ == "__main__":
 			break
 		elif input_response == "load":
 			load_configs(configs_key)
-		elif input_response == "start" or input_response == "end":
+		elif input_response == "start" or input_response == "end" or input_response == "c":
 			try:
 				if not configs_loaded is None:
 					if input_response == "start" or input_response == "end":
 						modify_path(input_response)
+					elif input_response == "c":
+						create_path(False, paths_configs)
 					else:
 						print "----------------Comparing The Directories %s and %s ---------------------------" % (paths_configs['start_path'], paths_configs['end_path'])
 						print
