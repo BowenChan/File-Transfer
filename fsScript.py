@@ -34,6 +34,9 @@ def set_completer():
 	readline.parse_and_bind("tab: complete")
 	readline.set_completer(complete)
 
+def load_configs():
+	print "Loaded configs"
+
 def create_path():
 	"""
 		Create a new object within the json config
@@ -52,7 +55,7 @@ def create_path():
 	end_path = raw_input()
 	config_tree = {}
 	config_tree["%s"  % config_name] = {}
-	data = {"start_path" : "%s" % start_path, "end_path" :"%s" %end_path }
+	data = {"start_path" : "%s" % os.path.abspath(start_path), "end_path" :"%s" % os.path.abspath(end_path) }
 	config_tree["%s" % config_name] = data
 	configJSON["Configs"] = config_tree
 
@@ -279,11 +282,22 @@ if __name__ == "__main__":
 			# Need to create a failsafe incase there is no configs. This will be required to create one in the emergency
 	except IOError:
 		create_path()
+		with codecs.open('%s/config.json' % file_path, 'r', 'utf-8') as config_file:
+			paths_configs = json.loads(config_file.read())			
 
-	print paths_configs
+
+	#print paths_configs["Configs"]["New"].keys()
+	
+	#Rename the variable later
+	configs_set = paths_configs["Configs"]
+	print configs_set.keys()
+	print configs_set
+	"""
+
 	print "What would you like to do"
 	
 	print "\tc 		(Create a new path)"
+	print "\tload	\t(Load a config)"
 	print "\tstart 	\t(Modify the source folder)"
 	print "\tend 	\t(Modify the end folder)"
 	print "\tq 		(Quit the program)"
@@ -311,5 +325,6 @@ if __name__ == "__main__":
 		print "\tAny Key to continue"
 		print "What would you like to do: ",
 		input_response = raw_input()
-
-
+	
+	"""
+	
