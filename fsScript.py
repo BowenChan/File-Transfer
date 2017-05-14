@@ -70,11 +70,12 @@ def create_path(initial, config_file):
 		config_tree["%s" % config_info["config_name"]] = data
 		return config_tree
 
-	print "=============================Creating new Config File============================="
 	if initial is True:
+		print "=============================Creating new Config File============================="
+		
 		configJSON = {}
 		configJSON["Configs"] = {}
-		
+
 		config_info = config_response()
 		config_tree = create_data_config()
 
@@ -86,6 +87,16 @@ def create_path(initial, config_file):
 
 		print "===============================New File Created==============================="
 	else:
+		print "=============================Creating new Config Path============================="
+	
+		config_info = config_response()
+		config_tree = create_data_config()
+		config_file["Configs"].update(config_tree)
+
+		jsonFile = codecs.open('%s/config.json' % file_path, 'w+', 'utf-8')
+		jsonFile.write(json.dumps(config_file, indent = 4))
+		jsonFile.close()
+
 		print "Loading file"
 def modify_path(option):
 	"""
@@ -337,13 +348,13 @@ if __name__ == "__main__":
 			break
 		elif input_response == "load":
 			load_configs(configs_key)
+		elif input_response == "c":	
+			create_path(False, paths_configs)	
 		elif input_response == "start" or input_response == "end" or input_response == "c":
 			try:
 				if not configs_loaded is None:
 					if input_response == "start" or input_response == "end":
 						modify_path(input_response)
-					elif input_response == "c":
-						create_path(False, paths_configs)
 					else:
 						print "----------------Comparing The Directories %s and %s ---------------------------" % (paths_configs['start_path'], paths_configs['end_path'])
 						print
