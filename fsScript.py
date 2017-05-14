@@ -70,34 +70,42 @@ def create_path(initial, config_file):
 		config_tree["%s" % config_info["config_name"]] = data
 		return config_tree
 
+	failed = False
 	if initial is True:
 		print "=============================Creating new Config File============================="
 		
-		configJSON = {}
-		configJSON["Configs"] = {}
+		config_file = {}
+		config_file["Configs"] = {}
 
 		config_info = config_response()
 		config_tree = create_data_config()
 
-		configJSON["Configs"] = config_tree
+		config_file["Configs"] = config_tree
 
-		jsonFile = codecs.open('%s/config.json' % file_path, 'w+', 'utf-8')
-		jsonFile.write(json.dumps(configJSON, indent = 4))
-		jsonFile.close()
-
-		print "===============================New File Created==============================="
 	else:
 		print "=============================Creating new Config Path============================="
-	
-		config_info = config_response()
-		config_tree = create_data_config()
-		config_file["Configs"].update(config_tree)
-
+		if not config_file["Configs"]:
+			config_info = config_response()
+			config_tree = create_data_config()
+			config_file["Configs"].update(config_tree)
+		else:
+			print "Config Object cannot be found, reverting to last previous working config"
+			
+			with codecs.open('%s/config.json' % file_path, 'w+', 'utf-8') as config_files:
+				global paths_configs
+				config_files.write(json.dumps(paths_configs, indent = 4))
+				#config_files.close()
+				paths_configs = json.loads(config_files.read())
+				config_files.close()
+				failed = True
+			
+	if not failed:
 		jsonFile = codecs.open('%s/config.json' % file_path, 'w+', 'utf-8')
 		jsonFile.write(json.dumps(config_file, indent = 4))
 		jsonFile.close()
 
-		print "Loading file"
+	print "=============================Finish Updating Config File============================="
+
 def modify_path(option):
 	"""
 		Changes either the end or start path of the file
@@ -310,20 +318,35 @@ if __name__ == "__main__":
 
 
 	file_path = script_path()
-
+	
 	try:
 		with codecs.open('%s/config.json' % file_path, 'r', 'utf-8') as config_file:
 			paths_configs = json.loads(config_file.read())
 			# Need to create a failsafe incase there is no configs. This will be required to create one in the emergency
 	except IOError:
+		print "Config File does not exist, Creating a Config File"
+		create_path(True, None)		
+	except ValueError:
+		print "Config file is not in a valid format, recreating Config File"
 		create_path(True, None)
+	finally:
 		with codecs.open('%s/config.json' % file_path, 'r', 'utf-8') as config_file:
 			paths_configs = json.loads(config_file.read())			
-
-
 	#print paths_configs["Configs"]["New"].keys()
 	
 	#Rename the variable later
+	try:
+		configs = paths_configs["Configs"]
+	except KeyError:
+		print "ERROR: Config file is missing the Config Object"
+		print "============Creating new Config File==========="
+		create_path(True, None)
+	finally:
+		#need to reload the paths config file 
+		with codecs.open('%s/config.json' % file_path, 'r', 'utf-8') as config_file:
+			paths_configs = json.loads(config_file.read())			
+
+	print paths_configs
 	configs = paths_configs["Configs"]
 	configs_key = configs.keys()
 	print configs
