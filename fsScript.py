@@ -64,14 +64,14 @@ def create_path(initial, config_file):
 		config_info["config_name"] = raw_input("What would you like to name the Config: ")
 		config_info["start_path"] = raw_input("What would you like the initial start path: ")
 		config_info["end_path"] = raw_input("What would you like the initial end path: ")
-		config_info["archive_path"] = raw_input("What would you like the Archive path: ")
+		config_info["archive_path"] = raw_input("What would you like the archive path: ")
 		return config_info
 
 	def create_data_config():
 		config_tree = {}
 		config_tree["%s"  % config_info["config_name"]] = {}
 		data = {"start_path" : "%s" % os.path.abspath(config_info["start_path"]), "end_path" :"%s" % os.path.abspath(config_info["end_path"]),
-			 "archive" : "No", "archive_path" : "%s" % os.path.abspath(config_info["archive_path"])}
+			 "archive" : False, "archive_path" : "%s" % os.path.abspath(config_info["archive_path"])}
 		config_tree["%s" % config_info["config_name"]] = data
 		return config_tree
 	
@@ -204,9 +204,9 @@ def modify_path(option, config_file):
 		set_end_path(path)
 
 def write_json_file(json_dump):
-	jsonFile = codecs.open('%s/config.json' % file_path, 'w+', 'utf-8')
-	jsonFile.write(json.dumps(json_dump, indent = 4))
-	jsonFile.close()
+	with codecs.open('%s/config.json' % file_path, 'w+', 'utf-8') as json_file:
+		json_file.write(json.dumps(json_dump, indent = 4))
+		json_file.close()
 
 def flip_archive(config_file):
 	"""
@@ -214,9 +214,10 @@ def flip_archive(config_file):
 		
 		parameter: config_file	the config you would like to flip archive move
 	"""
+	config_file["archive"] = not config_file["archive"]
+	print "\nSwitching archive mode from %s to %s" % (not config_file["archive"], config_file["archive"])
+	write_json_file(paths_configs)
 
-	if config_file["archive"] == "Yes":
-		config_file["archive"]
 def compare_files(dcmp):
 	"""	
 		compare_file
@@ -303,6 +304,8 @@ def replace_or_add_files(dcmp):
 				answer = raw_input()
 				if answer == "y":
 					add(names, False)
+				elif answer == "q":
+					break				
 
 	def permission_to_replace(dcmp):
 		"""
@@ -313,6 +316,8 @@ def replace_or_add_files(dcmp):
 			answer = raw_input()
 			if answer == "y":
 				add(name, True)
+			elif answer == "q":
+				break
 
 	permission_to_add(dcmp)
 	permission_to_replace(dcmp)
@@ -394,9 +399,9 @@ if __name__ == "__main__":
 	print "\tstart 	\t(Modify the source folder)"
 	print "\tend 	\t(Modify the end folder)"
 	print "\ta 		(Turn On/Off Archive)"
+	print "\tcmp 	\t(Comparing two folder)"
 	print "\tq 		(Quit the program)"
-	print "\tAny key to continue\n"
-	
+		
 	input_response = raw_input( "What would you like to do: ")
 		
 
@@ -408,7 +413,7 @@ if __name__ == "__main__":
 			load_configs(paths_configs["Configs"].keys())
 		elif input_response == "c":	
 			create_path(False, paths_configs)	
-		elif input_response == "start" or input_response == "end" or input_response == "a":
+		elif input_response == "start" or input_response == "end" or input_response == "a" or input_response == "cmp":
 			try:
 				if not configs_loaded is None:
 					if input_response == "start" or input_response == "end":
@@ -416,7 +421,7 @@ if __name__ == "__main__":
 					elif input_response == "a":
 						flip_archive(configs[configs_loaded])
 					else:
-						print "----------------Comparing The Directories %s and %s ---------------------------" % (paths_configs['start_path'], paths_configs['end_path'])
+						print "----------------Comparing The Directories %s and %s ---------------------------" % (configs[configs_loaded]['start_path'], configs[configs_loaded]['end_path'])
 						print
 						dcmp = dircmp(configs[configs_loaded]['start_path'], configs[configs_loaded]['end_path'], ignore = list_of_ignore)
 						compare_files(dcmp)
@@ -432,9 +437,10 @@ if __name__ == "__main__":
 		print "\tload	\t(Load a config)"
 		print "\tstart 	\t(Modify the source folder)"
 		print "\tend 	\t(Modify the end folder)"
+		print "\ta 		(Turn On/Off Archive)"
+		print "\tcmp 	\t(Comparing two folder)"
 		print "\tq 		(Quit the program)"
-		print "\tAny key to continue\n"
-
+		
 		input_response = raw_input("What would you like to do: ")
 	
 	
