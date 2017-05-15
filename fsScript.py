@@ -64,15 +64,18 @@ def create_path(initial, config_file):
 		config_info["config_name"] = raw_input("What would you like to name the Config: ")
 		config_info["start_path"] = raw_input("What would you like the initial start path: ")
 		config_info["end_path"] = raw_input("What would you like the initial end path: ")
+		config_info["archive_path"] = raw_input("What would you like the Archive path: ")
 		return config_info
 
 	def create_data_config():
 		config_tree = {}
 		config_tree["%s"  % config_info["config_name"]] = {}
-		data = {"start_path" : "%s" % os.path.abspath(config_info["start_path"]), "end_path" :"%s" % os.path.abspath(config_info["end_path"]) }
+		data = {"start_path" : "%s" % os.path.abspath(config_info["start_path"]), "end_path" :"%s" % os.path.abspath(config_info["end_path"]),
+			 "archive" : "No", "archive_path" : "%s" % os.path.abspath(config_info["archive_path"])}
 		config_tree["%s" % config_info["config_name"]] = data
 		return config_tree
-
+	
+	global paths_configs
 	failed = False
 	if initial is True:
 		print "=============================Creating new Config File============================="
@@ -101,32 +104,26 @@ def create_path(initial, config_file):
 			print "Config Object cannot be found, reverting to last previous working config"
 			
 			with codecs.open('%s/config.json' % file_path, 'w+', 'utf-8') as json_file:
-				global paths_configs
 				json_file.write(json.dumps(paths_configs, indent = 4))
 				json_file.close()
 
-			global path_configs
+
 			with codecs.open('%s/config.json' % file_path, 'r', 'utf-8') as json_file:
-				path_configs = json.loads(json_file.read())
+				paths_configs = json.loads(json_file.read())
 				json_file.close()
 			failed = True
 
 		
 			
-	if failed:
+	if not failed:
 		with codecs.open('%s/config.json' % file_path, 'w+', 'utf-8') as json_file:
 			json_file.write(json.dumps(config_file, indent = 4))
 			json_file.close()
 
-
-		"""
-			Updating path_configs when file is updated
-		"""
-		global path_configs
-		with codecs.open('%s/config.json' % file_path, 'r', 'utf-8') as json_file:
-			path_configs = json.loads(json_file.read())
+		with codecs.open('%s/config.json' % file_path, 'r', 'utf-8') as json_file:	
+			paths_configs = json.loads(json_file.read())
 			json_file.close()
-			
+
 	print "=============================Finish Updating Config File============================="
 
 def modify_path(option, config_file):
@@ -177,11 +174,7 @@ def modify_path(option, config_file):
 			config_file['start_path'] = return_path(path)
 			
 			#debug_path()
-
-			jsonFile = codecs.open('%s/config.json' % file_path, 'w+', 'utf-8')
-			
-			jsonFile.write(json.dumps(paths_configs, indent = 4))
-			jsonFile.close()
+			write_json_file(paths_configs)
 
 	def set_end_path(path):
 		"""
@@ -194,9 +187,7 @@ def modify_path(option, config_file):
 			config_file['end_path'] = return_path(path)
 
 			#debug_path()
-			jsonFile = codecs.open('%s/config.json' % file_path, 'w+', 'utf-8')
-			jsonFile.write(json.dumps(paths_configs, indent = 4))
-			jsonFile.close()
+			write_json_file(paths_configs)
 	
 	
 
@@ -212,6 +203,20 @@ def modify_path(option, config_file):
 		path = raw_input()
 		set_end_path(path)
 
+def write_json_file(json_dump):
+	jsonFile = codecs.open('%s/config.json' % file_path, 'w+', 'utf-8')
+	jsonFile.write(json.dumps(json_dump, indent = 4))
+	jsonFile.close()
+
+def flip_archive(config_file):
+	"""
+		Method flip_archive
+		
+		parameter: config_file	the config you would like to flip archive move
+	"""
+
+	if config_file["archive"] == "Yes":
+		config_file["archive"]
 def compare_files(dcmp):
 	"""	
 		compare_file
@@ -336,7 +341,7 @@ def print_all_modifications():
 	
 if __name__ == "__main__":
 
-	global paths_configs
+	#global paths_configs
 	list_of_ignore = ['.DS_Store', '.git']
 
 
@@ -351,9 +356,9 @@ if __name__ == "__main__":
 		print "Config File does not exist, Creating a Config File"
 		create_path(True, None)		
 	except ValueError:
+		print "Config file is not in a valid format, recreating Config File"
 		user_response = raw_input("Would you like to Create a new file (Y/N): ")
-		if user_response == "Y":
-			print "Config file is not in a valid format, recreating Config File"
+		if user_response == "Y":			
 			create_path(True, None)
 		elif user_response == "N":
 			sys.exit(0)
@@ -388,6 +393,7 @@ if __name__ == "__main__":
 	print "\tload	\t(Load a config)"
 	print "\tstart 	\t(Modify the source folder)"
 	print "\tend 	\t(Modify the end folder)"
+	print "\ta 		(Turn On/Off Archive)"
 	print "\tq 		(Quit the program)"
 	print "\tAny key to continue\n"
 	
@@ -402,11 +408,13 @@ if __name__ == "__main__":
 			load_configs(paths_configs["Configs"].keys())
 		elif input_response == "c":	
 			create_path(False, paths_configs)	
-		elif input_response == "start" or input_response == "end":
+		elif input_response == "start" or input_response == "end" or input_response == "a":
 			try:
 				if not configs_loaded is None:
 					if input_response == "start" or input_response == "end":
 						modify_path(input_response,configs[configs_loaded])
+					elif input_response == "a":
+						flip_archive(configs[configs_loaded])
 					else:
 						print "----------------Comparing The Directories %s and %s ---------------------------" % (paths_configs['start_path'], paths_configs['end_path'])
 						print
