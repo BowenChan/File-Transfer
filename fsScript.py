@@ -23,6 +23,9 @@ def script_path():
 	pathname = os.path.dirname(sys.argv[0])	
 	return os.path.abspath(pathname)
 
+def complete(text, state):
+    return (glob.glob(text+'*')+[None])[state]
+
 def set_completer():
 	"""
 		Sets up the folders autocompletion
@@ -88,12 +91,13 @@ def create_path(initial, config_file):
 			config_info = config_response()
 			config_tree = create_data_config()
 			config_file["Configs"].update(config_tree)
-		"""
+
+		else:
+			"""
 			This portion of code is here in the scneario where
-			the config_File will become dynamic and if the "Configs" object
+			the config_file will become dynamic and if the "Configs" object
 			will not be found in the middle of the code
-		""" 
-		elif not config_file["Configs"]:
+			""" 
 			print "Config Object cannot be found, reverting to last previous working config"
 			
 			with codecs.open('%s/config.json' % file_path, 'w+', 'utf-8') as json_file:
@@ -109,7 +113,7 @@ def create_path(initial, config_file):
 
 		
 			
-	if not failed:
+	if failed:
 		with codecs.open('%s/config.json' % file_path, 'w+', 'utf-8') as json_file:
 			json_file.write(json.dumps(config_file, indent = 4))
 			json_file.close()
@@ -125,7 +129,7 @@ def create_path(initial, config_file):
 			
 	print "=============================Finish Updating Config File============================="
 
-def modify_path(option):
+def modify_path(option, config_file):
 	"""
 		Changes either the end or start path of the file
 	"""
@@ -170,13 +174,13 @@ def modify_path(option):
 		"""
 
 		if path_exist(path):
-			paths_configs['start_path'] = return_path(path)
+			config_file['start_path'] = return_path(path)
 			
-			debug_path()
+			#debug_path()
 
 			jsonFile = codecs.open('%s/config.json' % file_path, 'w+', 'utf-8')
 			
-			jsonFile.write(json.dumps(paths_configs))
+			jsonFile.write(json.dumps(paths_configs, indent = 4))
 			jsonFile.close()
 
 	def set_end_path(path):
@@ -187,17 +191,17 @@ def modify_path(option):
 		will be placed
 		"""
 		if path_exist(path):
-			paths_configs['end_path'] = return_path(path)
+			config_file['end_path'] = return_path(path)
 
-			debug_path()
+			#debug_path()
 			jsonFile = codecs.open('%s/config.json' % file_path, 'w+', 'utf-8')
-			jsonFile.write(json.dumps(paths_configs))
+			jsonFile.write(json.dumps(paths_configs, indent = 4))
 			jsonFile.close()
 	
 	
 
 	set_completer()
-
+	global paths_configs
 	if option == 'start':
 		print "What would you like the new path to be: "
 		path = raw_input()
@@ -308,8 +312,7 @@ def replace_or_add_files(dcmp):
 	permission_to_add(dcmp)
 	permission_to_replace(dcmp)
 
-def complete(text, state):
-    return (glob.glob(text+'*')+[None])[state]
+
 
 def archive_destination_folder():
 	"""
@@ -342,13 +345,18 @@ if __name__ == "__main__":
 	try:
 		with codecs.open('%s/config.json' % file_path, 'r', 'utf-8') as config_file:
 			paths_configs = json.loads(config_file.read())
+	
 			# Need to create a failsafe incase there is no configs. This will be required to create one in the emergency
 	except IOError:
 		print "Config File does not exist, Creating a Config File"
 		create_path(True, None)		
 	except ValueError:
-		print "Config file is not in a valid format, recreating Config File"
-		create_path(True, None)
+		user_response = raw_input("Would you like to Create a new file (Y/N): ")
+		if user_response == "Y":
+			print "Config file is not in a valid format, recreating Config File"
+			create_path(True, None)
+		elif user_response == "N":
+			sys.exit(0)
 		"""
 	finally:
 		with codecs.open('%s/config.json' % file_path, 'r', 'utf-8') as config_file:
@@ -394,15 +402,15 @@ if __name__ == "__main__":
 			load_configs(paths_configs["Configs"].keys())
 		elif input_response == "c":	
 			create_path(False, paths_configs)	
-		elif input_response == "start" or input_response == "end" or input_response == "c":
+		elif input_response == "start" or input_response == "end":
 			try:
 				if not configs_loaded is None:
 					if input_response == "start" or input_response == "end":
-						modify_path(input_response)
+						modify_path(input_response,configs[configs_loaded])
 					else:
 						print "----------------Comparing The Directories %s and %s ---------------------------" % (paths_configs['start_path'], paths_configs['end_path'])
 						print
-						dcmp = dircmp(paths_configs['start_path'], paths_configs['end_path'], ignore = list_of_ignore)
+						dcmp = dircmp(configs[configs_loaded]['start_path'], configs[configs_loaded]['end_path'], ignore = list_of_ignore)
 						compare_files(dcmp)
 						replace_or_add_files(dcmp)
 			except NameError:
