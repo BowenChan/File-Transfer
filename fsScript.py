@@ -84,26 +84,45 @@ def create_path(initial, config_file):
 
 	else:
 		print "=============================Creating new Config Path============================="
-		if not config_file["Configs"]:
+		if config_file["Configs"]:
 			config_info = config_response()
 			config_tree = create_data_config()
 			config_file["Configs"].update(config_tree)
-		else:
+		"""
+			This portion of code is here in the scneario where
+			the config_File will become dynamic and if the "Configs" object
+			will not be found in the middle of the code
+		""" 
+		elif not config_file["Configs"]:
 			print "Config Object cannot be found, reverting to last previous working config"
 			
-			with codecs.open('%s/config.json' % file_path, 'w+', 'utf-8') as config_files:
+			with codecs.open('%s/config.json' % file_path, 'w+', 'utf-8') as json_file:
 				global paths_configs
-				config_files.write(json.dumps(paths_configs, indent = 4))
-				#config_files.close()
-				paths_configs = json.loads(config_files.read())
-				config_files.close()
-				failed = True
+				json_file.write(json.dumps(paths_configs, indent = 4))
+				json_file.close()
+
+			global path_configs
+			with codecs.open('%s/config.json' % file_path, 'r', 'utf-8') as json_file:
+				path_configs = json.loads(json_file.read())
+				json_file.close()
+			failed = True
+
+		
 			
 	if not failed:
-		jsonFile = codecs.open('%s/config.json' % file_path, 'w+', 'utf-8')
-		jsonFile.write(json.dumps(config_file, indent = 4))
-		jsonFile.close()
+		with codecs.open('%s/config.json' % file_path, 'w+', 'utf-8') as json_file:
+			json_file.write(json.dumps(config_file, indent = 4))
+			json_file.close()
 
+
+		"""
+			Updating path_configs when file is updated
+		"""
+		global path_configs
+		with codecs.open('%s/config.json' % file_path, 'r', 'utf-8') as json_file:
+			path_configs = json.loads(json_file.read())
+			json_file.close()
+			
 	print "=============================Finish Updating Config File============================="
 
 def modify_path(option):
@@ -314,6 +333,7 @@ def print_all_modifications():
 	
 if __name__ == "__main__":
 
+	global paths_configs
 	list_of_ignore = ['.DS_Store', '.git']
 
 
@@ -329,9 +349,12 @@ if __name__ == "__main__":
 	except ValueError:
 		print "Config file is not in a valid format, recreating Config File"
 		create_path(True, None)
+		"""
 	finally:
 		with codecs.open('%s/config.json' % file_path, 'r', 'utf-8') as config_file:
-			paths_configs = json.loads(config_file.read())			
+			paths_configs = json.loads(config_file.read())	
+			config_file.close()		
+	"""
 	#print paths_configs["Configs"]["New"].keys()
 	
 	#Rename the variable later
@@ -348,9 +371,7 @@ if __name__ == "__main__":
 
 	print paths_configs
 	configs = paths_configs["Configs"]
-	configs_key = configs.keys()
 	print configs
-	print configs_key
 	
 
 	print "----------------------------------Menu----------------------------------"
@@ -370,7 +391,7 @@ if __name__ == "__main__":
 		if input_response == "q":
 			break
 		elif input_response == "load":
-			load_configs(configs_key)
+			load_configs(paths_configs["Configs"].keys())
 		elif input_response == "c":	
 			create_path(False, paths_configs)	
 		elif input_response == "start" or input_response == "end" or input_response == "c":
